@@ -24,6 +24,18 @@ If you generate workbooks with scripts or AI agents, these failures reach your r
 | **AI agent builders** | Agents that generate spreadsheets with openpyxl/xlsxwriter | A deterministic pre-delivery check an agent can run and self-repair against — lint rules encode the exact function-compatibility traps agents fall into |
 | **Anyone shipping Excel** | One-off exports you send to people who open them in Excel, WPS or a phone preview | The file your reader opens shows numbers, not blanks — because a real engine has already computed it once |
 
+## How the gate decides
+
+Spreadsheet applications cache formula results inside the file. A workbook can therefore display values that no longer match its formulas — after edits by another tool, a broken external link, or a partial save — and look perfectly fine on screen.
+
+The gate runs three steps on a copy of the workbook:
+
+1. **Lint.** Structural checks first. If the workbook carries external links, re-saving would strip the links and their cached values, so the file is reported instead of rewritten.
+2. **Recompute.** A headless LibreOffice recalculation forces every formula to re-evaluate.
+3. **Read back.** The cached values are read from the recomputed file and scanned for error values (#VALUE!, #REF!, …).
+
+Verdicts: `success` (safe to deliver), `errors_found` (formula errors present after recalculation), `lint_failed` (the file should not be re-saved at all). A delivery workflow should treat anything except `success` as a stop, not a warning.
+
 ## Usage
 
 ```bash
