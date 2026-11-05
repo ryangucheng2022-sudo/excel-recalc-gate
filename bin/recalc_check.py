@@ -127,10 +127,21 @@ def main() -> int:
         td = Path(td)
         work = td / src.name
         shutil.copy2(src, work)
-        r = subprocess.run(
-            ["soffice", "--headless", "--norestore", "--convert-to", "xlsx",
-             "--outdir", str(td / "out"), str(work)],
-            capture_output=True, text=True, timeout=args.timeout)
+        try:
+            r = subprocess.run(
+                ["soffice", "--headless", "--norestore", "--convert-to", "xlsx",
+                 "--outdir", str(td / "out"), str(work)],
+                capture_output=True, text=True, timeout=args.timeout)
+        except FileNotFoundError:
+            print(json.dumps({"status": "recalc_failed",
+                              "error": "LibreOffice executable 'soffice' not found on PATH; "
+                                       "install LibreOffice to run the recalculation step "
+                                       "(lint checks above already passed)"}))
+            return 2
+        except subprocess.TimeoutExpired:
+            print(json.dumps({"status": "recalc_failed",
+                              "error": f"LibreOffice recalculation timed out after {args.timeout}s"}))
+            return 2
         out_file = td / "out" / src.name
         if r.returncode != 0 or not out_file.exists():
             print(json.dumps({"status": "recalc_failed",

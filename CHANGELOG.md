@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.0.1 (2026-11-05)
+
+- **Fix**: when LibreOffice (`soffice`) is missing from PATH, the tool now
+  honors its documented contract — a `recalc_failed` JSON verdict with exit
+  code 2 — instead of crashing with a `FileNotFoundError` traceback and no
+  JSON output. A recalculation timeout is reported the same way. Found by
+  CI: in the lint-and-unit job (no LibreOffice installed), a lint-clean
+  workbook reached the recalculation step and the missing executable took
+  down the test reading the verdict.
+- Regression test covers the missing-`soffice` path in both CI jobs.
+
 ## v1.0.0 (2026-11-04)
 
 Initial open-source release.

@@ -5,6 +5,7 @@ LibreOffice headless conversion and are skipped when soffice is missing.
 Run: python3 -m unittest discover -s tests -v
 """
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -68,6 +69,22 @@ class LintTests(unittest.TestCase):
         p = self.book({"A1": '=_xlfn.TEXTJOIN(",",TRUE,B1:B3)', "B1": "x"})
         _rc, out = run_gate(p)
         self.assertNotEqual(out["status"], "lint_failed")
+
+    def test_missing_soffice_reports_recalc_failed_not_traceback(self):
+        # Regression: in an environment without LibreOffice (e.g. a CI job
+        # that only runs lint/unit tests), a lint-clean workbook used to
+        # crash the tool with FileNotFoundError and no JSON output. The
+        # documented contract is a recalc_failed verdict with exit code 2.
+        p = self.book({"A1": '=_xlfn.TEXTJOIN(",",TRUE,B1:B3)', "B1": "x"})
+        empty_path = Path(self.td) / "empty-path"
+        empty_path.mkdir()
+        env = dict(os.environ, PATH=str(empty_path))
+        r = subprocess.run([sys.executable, str(TOOL), str(p)],
+                           capture_output=True, text=True, timeout=60, env=env)
+        out = json.loads(r.stdout.strip().splitlines()[-1])
+        self.assertEqual(out["status"], "recalc_failed")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("soffice", out["error"])
 
     def test_external_link_refused_without_force(self):
         p = self.book({"A1": "='[1]Other'!$B$2"})

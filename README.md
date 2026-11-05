@@ -85,7 +85,7 @@ A ready-to-enable GitHub Actions kit lives in `ci/`: two jobs (unit tests, and a
 
 ```bash
 python3 -m unittest discover -s tests -v
-# 9 cases: 7 lint/verdict cases + 2 real-recalc cases (skipped if soffice is absent)
+# 10 cases: 8 lint/verdict cases + 2 real-recalc cases (skipped if soffice is absent)
 ```
 
 ## Version

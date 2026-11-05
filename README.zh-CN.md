@@ -85,7 +85,7 @@ python3 bin/recalc_check.py report.xlsx --timeout 120
 
 ```bash
 python3 -m unittest discover -s tests -v
-# 9 个用例：7 个 lint/裁决用例 + 2 个真实重算用例（无 soffice 时自动跳过）
+# 10 个用例：8 个 lint/裁决用例 + 2 个真实重算用例（无 soffice 时自动跳过）
 ```
 
 ## 版本
