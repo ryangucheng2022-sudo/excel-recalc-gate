@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "excel-recalc-gate"
+version = "1.0.0"
+description = "Pre-delivery formula-recalculation gate for Excel workbooks (LibreOffice headless)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.9"
+dependencies = ["openpyxl>=3.1"]
+
+[project.scripts]
+recalc-check = "recalc_check:main"
+
+[tool.setuptools]
+py-modules = ["recalc_check"]
+
+[tool.setuptools.package-dir]
+"" = "bin"

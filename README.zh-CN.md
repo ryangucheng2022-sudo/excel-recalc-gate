@@ -36,6 +36,14 @@ openpyxl 这类库写出的公式**没有缓存值**。在真正的表格引擎�
 
 判定结果：`success`（可交付）、`errors_found`（重算后仍有公式错误）、`lint_failed`（该文件根本不该被重存）。交付流程应把非 `success` 一律当作停机信号，而不是警告。
 
+## 安装
+
+```bash
+pip install git+https://github.com/ryangucheng2022-sudo/excel-recalc-gate.git   # 提供 recalc-check 命令
+```
+
+完整重算需要 PATH 里有 LibreOffice（soffice）；没有时预检照常运行、重算步会自报不可用。也可以直接 clone 后运行 `bin/recalc_check.py`。
+
 ## 用法
 
 ```bash
@@ -63,6 +71,10 @@ python3 bin/recalc_check.py report.xlsx --timeout 120
 ## 配套规范
 
 [docs/delivery-standards.md](docs/delivery-standards.md) 是与闸门配套的建模与编辑规范提炼版：函数该用哪些、假设参数怎么放、为什么绝不能保存 `data_only=True` 打开的工作簿、为什么生成的工作簿不该带打印区域。
+
+## 持续集成
+
+`ci/` 里有一套备好的 GitHub Actions 工具包：两个 job（单元测试；以及安装 LibreOffice 的真实重算 job，并把固定样例——干净公式、错误公式、打印区域、被禁的动态数组函数——逐一过闸门断言判定）。把 `ci/ci.yml` 复制到 `.github/workflows/ci.yml` 即可启用。
 
 ## 环境
 

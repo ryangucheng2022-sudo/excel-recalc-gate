@@ -36,6 +36,14 @@ The gate runs three steps on a copy of the workbook:
 
 Verdicts: `success` (safe to deliver), `errors_found` (formula errors present after recalculation), `lint_failed` (the file should not be re-saved at all). A delivery workflow should treat anything except `success` as a stop, not a warning.
 
+## Install
+
+```bash
+pip install git+https://github.com/ryangucheng2022-sudo/excel-recalc-gate.git   # provides the `recalc-check` command
+```
+
+Full recalculation needs LibreOffice (`soffice`) on PATH; without it the lint still runs and the recalc step reports itself unavailable. Or clone the repo and run `bin/recalc_check.py` directly.
+
 ## Usage
 
 ```bash
@@ -63,6 +71,10 @@ The source file is **never modified** — recalculation happens on a temp copy.
 ## Companion checklist
 
 [docs/delivery-standards.md](docs/delivery-standards.md) distills the modeling and editing rules that pair with the gate: which functions to use, how to structure assumptions, why you must never save a workbook opened with `data_only=True`, and why generated workbooks should not carry a print area.
+
+## CI
+
+A ready-to-enable GitHub Actions kit lives in `ci/`: two jobs (unit tests, and a real-recalculation job that installs LibreOffice and pushes fixed sample workbooks — clean, error formula, print area, banned dynamic-array function — through the gate). Copy `ci/ci.yml` to `.github/workflows/ci.yml` to enable it.
 
 ## Requirements
 

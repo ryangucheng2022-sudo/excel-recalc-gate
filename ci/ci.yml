@@ -1,0 +1,33 @@
+# Copy to .github/workflows/ci.yml to enable (see ci/README.md).
+name: ci
+on: [push, pull_request]
+jobs:
+  lint-and-unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install "openpyxl>=3.1"
+      - name: Unit tests (real-recalc cases skip without LibreOffice)
+        run: python -m unittest discover -s tests -v
+  real-recalc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install LibreOffice
+        run: sudo apt-get update && sudo apt-get install -y libreoffice-calc
+      - run: pip install "openpyxl>=3.1"
+      - name: Full test suite (real recalculation path included)
+        run: python -m unittest discover -s tests -v
+      - name: Fixed samples through the gate CLI
+        run: |
+          python ci/make_samples.py samples
+          python bin/recalc_check.py samples/ok.xlsx | grep -q '"status": "success"'
+          python bin/recalc_check.py samples/err.xlsx | grep -q '"status": "errors_found"'
+          python bin/recalc_check.py samples/printarea.xlsx | grep -q '"status": "lint_failed"'
+          python bin/recalc_check.py samples/dynarray.xlsx | grep -q '"status": "lint_failed"'
